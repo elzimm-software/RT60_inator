@@ -7,6 +7,7 @@ from scipy.io import wavfile
 import pathlib
 #from pydub import AudioSegment
 import scipy.io as scio
+import numpy as np
 
 
 class View():
@@ -66,7 +67,7 @@ class Model:
             self.samplerate, self.data = wavfile.read(self.file)
             self.duration = round(self.data.shape[0]/self.samplerate, 1)
             if len(self.data.shape) > 1:
-                self.data = self.data.mean(axis=1)
+                self.data = np.array([(x[0]+x[1])/2 for x in self.data]).astype(np.int16)
         else:
             self.file = None
             self.samplerate = None
