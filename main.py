@@ -39,7 +39,7 @@ class View():
             self.controller.import_clicked(filename)
 
     def set_active_file(self, filename, duration):
-        self.file_name.set("{} : {}".format(filename, duration))
+        self.file_name.set("{} : {}s".format(filename, duration))
         self.file_disp.config(text=self.file_name.get())
 
 class Controller:
@@ -63,7 +63,7 @@ class Model:
             #    file = "converted.wav"
             self.file = file
             self.samplerate, self.data = wavfile.read(self.file)
-            self.duration = round(self.data.shape[0]/self.samplerate, 3)
+            self.duration = round(self.data.shape[0]/self.samplerate, 1)
         else:
             self.file = None
             self.samplerate = None
