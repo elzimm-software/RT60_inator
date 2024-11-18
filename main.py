@@ -1,8 +1,11 @@
 import tkinter as tk
-from importlib.metadata import files
 from tkinter import *
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename
+from scipy.io import wavfile
+import pathlib
+#from pydub import AudioSegment
+import scipy.io as scio
 
 
 class View():
@@ -32,7 +35,7 @@ class View():
 
     def import_clicked(self):
         if self.controller is not None:
-            filename = askopenfilename()
+            filename = askopenfilename(filetypes=[("Audio files", ".wav .mp3")])
             self.controller.import_clicked(filename)
 
     def set_active_file(self, filename, duration):
@@ -46,13 +49,26 @@ class Controller:
         view.set_controller(self)
 
     def import_clicked(self, filename):
-        self.model = Model(filename)
-        self.view.set_active_file(self.model.file, self.model.duration)
+        new_model = Model(filename)
+        if new_model.file is not None:
+            self.model = new_model
+            self.view.set_active_file(self.model.file, self.model.duration)
 
 class Model:
     def __init__(self, file):
-        self.file = file
-        self.duration = None
+        if file != '':
+            #if pathlib.Path(file).suffix == '.mp3':
+            #    sound = AudioSegment.from_mp3(file)
+            #    sound.export("converted.wav", format="format")
+            #    file = "converted.wav"
+            self.file = file
+            self.samplerate, self.data = wavfile.read(self.file)
+            self.duration = round(self.data.shape[0]/self.samplerate, 3)
+        else:
+            self.file = None
+            self.samplerate = None
+            self.data = None
+            self.duration = None
 
 if __name__ == "__main__":
     model = Model("./test_files/dorm.wav")
