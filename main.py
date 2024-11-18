@@ -1,6 +1,9 @@
 import tkinter as tk
+from importlib.metadata import files
 from tkinter import *
 from tkinter import ttk
+from tkinter.filedialog import askopenfilename
+
 
 class View():
     def __init__(self):
@@ -11,18 +14,16 @@ class View():
         self.files = ttk.Frame(self.tab_control)
         self.waveform = ttk.Frame(self.tab_control)
         self.analysis = ttk.Frame(self.tab_control)
-        self.tab_control.add(self.files, text="Files")
+        self.active_file = ttk.Frame(self.root)
+        self.active_file.pack(side=tk.TOP, fill=tk.X)
         self.tab_control.add(self.waveform, text="Waveform")
         self.tab_control.add(self.analysis, text="Analysis")
         self.tab_control.pack(expand=1, fill="both")
-        self.file_buttons = ttk.Frame(self.files)
-        self.file_buttons.pack(side=tk.TOP, fill="x")
-        self.import_button = ttk.Button(self.file_buttons, text="Import")
-        self.import_button.pack(side=tk.LEFT)
-        self.remove_button = ttk.Button(self.file_buttons, text="Remove")
-        self.remove_button.pack(side=tk.LEFT)
-        self.set_active_button = ttk.Button(self.file_buttons, text="Set Active")
-        self.set_active_button.pack(side=tk.LEFT)
+        self.import_button = ttk.Button(self.active_file, text="Import", command=self.import_clicked)
+        self.import_button.pack(side="right")
+        self.file_name = tk.StringVar()
+        self.file_disp = ttk.Label(self.active_file)
+        self.file_disp.pack(side="left")
 
         self.controller = None
 
@@ -31,37 +32,30 @@ class View():
 
     def import_clicked(self):
         if self.controller is not None:
-            self.controller.import_file()
+            filename = askopenfilename()
+            self.controller.import_clicked(filename)
 
-    def remove_clicked(self):
-        if self.controller is not None:
-            self.controller.remove_file()
-
-    def set_active_clicked(self):
-        if self.controller is not None:
-            self.controller.set_active_file()
+    def set_active_file(self, filename, duration):
+        self.file_name.set("{} : {}".format(filename, duration))
+        self.file_disp.config(text=self.file_name.get())
 
 class Controller:
-    def __init__(self, model, view):
+    def __init__(self, model=None, view=None):
         self.model = model
         self.view = view
         view.set_controller(self)
 
-    def import_file(self):
-        pass
-
-    def remove_file(self):
-        pass
-
-    def set_active_file(self):
-        pass
+    def import_clicked(self, filename):
+        self.model = Model(filename)
+        self.view.set_active_file(self.model.file, self.model.duration)
 
 class Model:
-    def __init__(self):
-        pass
+    def __init__(self, file):
+        self.file = file
+        self.duration = None
 
 if __name__ == "__main__":
-    model = Model()
+    model = Model("./test_files/dorm.wav")
     view = View()
     controller = Controller(model, view)
     view.root.mainloop()
