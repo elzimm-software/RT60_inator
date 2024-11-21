@@ -5,7 +5,7 @@ from model import Model
 from view import View
 
 if __name__ == "__main__":
-    model = Model("./test_files/dorm.wav")
+    model = Model()
     view = View()
     controller = Controller(model, view)
     view.root.mainloop()

@@ -3,7 +3,7 @@ from scipy.io import wavfile
 
 
 class Model:
-    def __init__(self, file):
+    def __init__(self, file=""):
         if file != '':
             #if pathlib.Path(file).suffix == '.mp3':
             #    sound = AudioSegment.from_mp3(file)
