@@ -9,21 +9,26 @@ class Model:
     def __init__(self, file=""):
         if file != '':
             self.file = file
-            if pathlib.Path(file).suffix == '.mp3':
-                _sound = AudioSegment.from_mp3(file)
-                _sound.export("converted.wav", format="wav")
-                self.samplerate, self.data = wavfile.read("converted.wav")
-                pathlib.Path("converted.wav").unlink()
-            else:
-                self.samplerate, self.data = wavfile.read(self.file)
+            self.convert_mp3()
             self.duration = self.data.shape[0]/self.samplerate
-            if len(self.data.shape) > 1:
-                self.mono = np.array([( x[0]+x[1])/2 for x in self.data]).astype(np.int16)
+            self.convert_mono()
         else:
             self.file = None
             self.samplerate = None
             self.data = None
             self.duration = None
+
+    def convert_mono(self):
+        if len(self.data.shape) > 1:
+            self.mono = np.array([( x[0] + x[1] )/2 for x in self.data]).astype(np.int16)
+
+    def convert_mp3(self):
+        if pathlib.Path(self.file).suffix == '.mp3':
+            AudioSegment.from_mp3(self.file).export("converted.wav", format="wav")
+            self.samplerate, self.data = wavfile.read("converted.wav")
+            pathlib.Path("converted.wav").unlink()
+        else:
+            self.samplerate, self.data = wavfile.read(self.file)
 
     def gen_waveform_figure(self):
         _fig = Figure(figsize=(5, 4), dpi=100)
