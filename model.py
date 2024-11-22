@@ -1,18 +1,22 @@
 import numpy as np
+import pathlib
 from scipy.io import wavfile
 from matplotlib.figure import Figure
+from pydub import AudioSegment
 
 
 class Model:
     def __init__(self, file=""):
         if file != '':
-            #if pathlib.Path(file).suffix == '.mp3':
-            #    sound = AudioSegment.from_mp3(file)
-            #    sound.export("converted.wav", format="format")
-            #    file = "converted.wav"
             self.file = file
-            self.samplerate, self.data = wavfile.read(self.file)
-            self.duration = round(self.data.shape[0]/self.samplerate, 1)
+            if pathlib.Path(file).suffix == '.mp3':
+                _sound = AudioSegment.from_mp3(file)
+                _sound.export("converted.wav", format="wav")
+                self.samplerate, self.data = wavfile.read("converted.wav")
+                pathlib.Path("converted.wav").unlink()
+            else:
+                self.samplerate, self.data = wavfile.read(self.file)
+            self.duration = self.data.shape[0]/self.samplerate
             if len(self.data.shape) > 1:
                 self.mono = np.array([( x[0]+x[1])/2 for x in self.data]).astype(np.int16)
         else:
