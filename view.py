@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import Tk, ttk
 from tkinter.filedialog import askopenfilename
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
 class View():
@@ -37,6 +38,8 @@ class View():
 
         self.controller = None
 
+        self.waveform_canvas = None
+
     def set_controller(self, controller):
         self.controller = controller
 
@@ -44,6 +47,11 @@ class View():
         if self.controller is not None:
             filename = askopenfilename(filetypes=[("Audio files", ".wav .mp3")])
             self.controller.import_clicked(filename)
+
+    def update_waveform(self):
+        self.waveform_canvas = FigureCanvasTkAgg(self.controller.gen_waveform_figure(), master=self.waveform)
+        self.waveform_canvas.draw()
+        self.waveform_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
     def set_active_file(self, filename, duration):
         self.file_name.set("{} : {}s".format(filename, duration))
