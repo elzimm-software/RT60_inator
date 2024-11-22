@@ -34,12 +34,12 @@ class Model:
         _fig = Figure(figsize=(5, 4), dpi=100)
         _waveform = _fig.add_subplot(111)
         _x = np.linspace(0., self.duration, self.data.shape[0])
-        _waveform.plot(_x, self.data[:,0], label="Left channel")
         if len(self.data.shape) > 1:
+            _waveform.plot(_x, self.data[:,0], label="Left channel")
             _waveform.plot(_x, self.data[:,1], label="Right channel")
+            _waveform.legend()
         else:
-            _waveform.plot(_x, self.data[:,0], label="Right channel")
-        _waveform.legend()
+            _waveform.plot(_x, self.data)
         return _fig
 
 
