@@ -54,5 +54,5 @@ class View():
         self.waveform_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
     def set_active_file(self, filename, duration):
-        self.file_name.set("{} : {}s".format(filename, duration))
+        self.file_name.set("{} : {}s".format(filename, round(duration, 2)))
         self.file_disp.config(text=self.file_name.get())
