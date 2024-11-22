@@ -49,6 +49,8 @@ class View():
             self.controller.import_clicked(filename)
 
     def update_waveform(self):
+        if self.waveform_canvas is not None:
+            self.waveform_canvas.get_tk_widget().pack_forget()
         self.waveform_canvas = FigureCanvasTkAgg(self.controller.gen_waveform_figure(), master=self.waveform)
         self.waveform_canvas.draw()
         self.waveform_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
