@@ -2,3 +2,4 @@ tkinter
 scipy
 pathlib
 numpy
+matplotlib
