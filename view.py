@@ -10,7 +10,6 @@ class View():
         self.root.minsize(800, 600)
 
         self.tab_control = ttk.Notebook(self.root)
-        self.files = ttk.Frame(self.tab_control)
         self.waveform = ttk.Frame(self.tab_control)
         self.analysis = ttk.Frame(self.tab_control)
         self.low_freq = ttk.Frame(self.tab_control)
