@@ -3,6 +3,7 @@ import pathlib
 from scipy.io import wavfile
 from matplotlib.figure import Figure
 from pydub import AudioSegment
+from utils import decibel_to_digital, digital_to_decibel
 
 
 class Model:
@@ -11,16 +12,30 @@ class Model:
             self.file = file
             self.convert_mp3()
             self.duration = self.data.shape[0]/self.samplerate
-            self.convert_mono()
+            self.rt60_time = self.compute_rt60_time()
         else:
             self.file = None
             self.samplerate = None
             self.data = None
             self.duration = None
+            self.rt60_time = None
+
+    def compute_rt60_time(self):
+        _mono = self.convert_mono()
+        _decibel = np.array([(digital_to_decibel(x)) for x in _mono]).astype(np.int16)
+        _max = np.max(_decibel)
+        _max_index = np.where(_decibel == _max)[0][0]
+        _5_under_index = np.where(_decibel[_max_index:] == _max - 5)[0][0]
+        _25_under_index = np.where(_decibel[_5_under_index:] == _max - 25)[0][0]
+        _rt20_time = (_25_under_index - _5_under_index) / self.samplerate
+        return _rt20_time * 3
+
 
     def convert_mono(self):
         if len(self.data.shape) > 1:
-            self.mono = np.array([( x[0] + x[1] )/2 for x in self.data]).astype(np.int16)
+            return np.array([( x[0] + x[1] )/2 for x in self.data]).astype(np.int16)
+        else:
+            return self.data
 
     def convert_mp3(self):
         if pathlib.Path(self.file).suffix == '.mp3':
