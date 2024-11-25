@@ -3,6 +3,7 @@ import pathlib
 from scipy.io import wavfile
 from matplotlib.figure import Figure
 from pydub import AudioSegment
+from scipy.io.wavfile import WavFileWarning
 
 
 class Model:
@@ -28,7 +29,10 @@ class Model:
             self.samplerate, self.data = wavfile.read("converted.wav")
             pathlib.Path("converted.wav").unlink()
         else:
-            self.samplerate, self.data = wavfile.read(self.file)
+            try:
+                self.samplerate, self.data = wavfile.read(self.file)
+            except WavFileWarning:
+                pass # scipy truncates meta data automatically
 
     def gen_waveform_figure(self):
         _fig = Figure(figsize=(5, 4), dpi=100)
