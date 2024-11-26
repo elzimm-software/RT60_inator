@@ -3,7 +3,7 @@ import pathlib
 from scipy.io import wavfile
 from matplotlib.figure import Figure
 from pydub import AudioSegment
-from utils import decibel_to_digital, digital_to_decibel
+from utils import digital_to_decibel, high_pass, low_pass
 
 
 class Model:
@@ -12,16 +12,28 @@ class Model:
             self.file = file
             self.convert_mp3()
             self.duration = self.data.shape[0]/self.samplerate
-            self.rt60_time = self.compute_rt60_time()
+            self.low_freq, self.mid_freq, self.high_freq = self.split_freq()
+            self.low_rt60 = self.compute_rt60_time(self.low_freq)
+            self.mid_rt60 = self.compute_rt60_time(self.mid_freq)
+            self.high_rt60 = self.compute_rt60_time(self.high_freq)
+            print(self.low_rt60, self.mid_rt60, self.high_rt60)
         else:
             self.file = None
             self.samplerate = None
             self.data = None
             self.duration = None
-            self.rt60_time = None
+            self.low_freq, self.mid_freq, self.high_freq = None, None, None
+            self.low_rt60, self.mid_rt60, self.high_rt60 = None, None, None
 
-    def compute_rt60_time(self):
-        _mono = self.convert_mono()
+    def split_freq(self):
+        _mono = Model.convert_mono(self.data)
+        _low = low_pass(high_pass(_mono, 1, self.samplerate), 1000, self.samplerate)
+        _mid = low_pass(high_pass(_mono, 1001, self.samplerate), 3000, self.samplerate)
+        _high = low_pass(high_pass(_mono, 3001, self.samplerate), 20000, self.samplerate)
+        return _low, _mid, _high
+
+    def compute_rt60_time(self, signal):
+        _mono = Model.convert_mono(signal)
         _decibel = np.array([(digital_to_decibel(x)) for x in _mono]).astype(np.int16)
         _max = np.max(_decibel)
         _max_index = np.where(_decibel == _max)[0][0]
