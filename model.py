@@ -30,12 +30,12 @@ class Model:
         _rt20_time = (_25_under_index - _5_under_index) / self.samplerate
         return _rt20_time * 3
 
-
-    def convert_mono(self):
-        if len(self.data.shape) > 1:
-            return np.array([( x[0] + x[1] )/2 for x in self.data]).astype(np.int16)
+    @staticmethod
+    def convert_mono(signal):
+        if len(signal.shape) > 1:
+            return np.array([( x[0] + x[1] )/2 for x in signal]).astype(np.int16)
         else:
-            return self.data
+            return signal
 
     def convert_mp3(self):
         if pathlib.Path(self.file).suffix == '.mp3':
