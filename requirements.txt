@@ -1,4 +1,3 @@
-tkinter
 scipy~=1.14.1
 pathlib
 numpy~=2.1.3
