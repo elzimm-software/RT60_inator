@@ -1,5 +1,9 @@
 import numpy as np
 from scipy.signal import butter, filtfilt
+from tkinter import messagebox
+
+def display_error(message):
+    messagebox.showerror("Error", message)
 
 def low_pass(signal, cut, fs):
     nyq = 0.5 * fs
