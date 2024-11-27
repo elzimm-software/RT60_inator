@@ -82,6 +82,8 @@ class Model:
             _waveform.plot(_x, self.data[:,0], label="Left channel")
             _waveform.plot(_x, self.data[:,1], label="Right channel")
             _waveform.legend()
+            _waveform.set_xlabel("Time (s)")
+            _waveform.set_ylabel("Amplitude")
         else:
             _waveform.plot(_x, self.data)
         return _fig
