@@ -3,20 +3,31 @@ import pathlib
 from scipy.io import wavfile
 from matplotlib.figure import Figure
 from pydub import AudioSegment
-from utils import digital_to_decibel, high_pass, low_pass
+from utils import digital_to_decibel, high_pass, low_pass, display_error
 
 
 class Model:
     def __init__(self, file=""):
         if file != '':
             self.file = file
-            self.convert_mp3()
-            self.duration = self.data.shape[0]/self.samplerate
-            self.low_freq, self.mid_freq, self.high_freq = self.split_freq()
-            self.low_rt60 = self.compute_rt60_time(self.low_freq)
-            self.mid_rt60 = self.compute_rt60_time(self.mid_freq)
-            self.high_rt60 = self.compute_rt60_time(self.high_freq)
-            print(self.low_rt60, self.mid_rt60, self.high_rt60)
+            if self.convert_mp3():
+                self.duration = self.data.shape[0]/self.samplerate
+                self.low_freq, self.mid_freq, self.high_freq = self.split_freq()
+                self.low_rt60 = self.compute_rt60_time(self.low_freq)
+                self.mid_rt60 = self.compute_rt60_time(self.mid_freq)
+                self.high_rt60 = self.compute_rt60_time(self.high_freq)
+                self.combined_rt60 = self.compute_rt60_time(self.data)
+                print(self.combined_rt60)
+                print(self.low_rt60, self.mid_rt60, self.high_rt60)
+            else:
+                display_error("Invalid file type.")
+                self.file = None
+                self.samplerate = None
+                self.data = None
+                self.duration = None
+                self.low_freq,self.mid_freq,self.high_freq = None, None, None
+                self.low_rt60, self.mid_rt60, self.high_rt60 = None, None, None
+                self.combined_rt60 = None
         else:
             self.file = None
             self.samplerate = None
@@ -24,6 +35,7 @@ class Model:
             self.duration = None
             self.low_freq, self.mid_freq, self.high_freq = None, None, None
             self.low_rt60, self.mid_rt60, self.high_rt60 = None, None, None
+            self.combined_rt60 = None
 
     def split_freq(self):
         _mono = Model.convert_mono(self.data)
@@ -50,12 +62,17 @@ class Model:
             return signal
 
     def convert_mp3(self):
-        if pathlib.Path(self.file).suffix == '.mp3':
+        ext = pathlib.Path(self.file).suffix.lower()
+        if ext == '.mp3':
             AudioSegment.from_mp3(self.file).export("converted.wav", format="wav")
             self.samplerate, self.data = wavfile.read("converted.wav")
             pathlib.Path("converted.wav").unlink()
-        else:
+            return True
+        elif ext == '.wav':
             self.samplerate, self.data = wavfile.read(self.file)
+            return True
+        else:
+            return False
 
     def gen_waveform_figure(self):
         _fig = Figure(figsize=(5, 4), dpi=100)
