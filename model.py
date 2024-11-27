@@ -2,6 +2,7 @@ import numpy as np
 import pathlib
 from scipy.io import wavfile
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 from pydub import AudioSegment
 from utils import digital_to_decibel, high_pass, low_pass, display_error
 
@@ -87,3 +88,13 @@ class Model:
         else:
             _waveform.plot(_x, self.data)
         return _fig
+
+    def gen_intensity_figure(self):
+        fig, ax = plt.subplots()
+        if len(self.data.shape) > 1:
+            spectrum, freqs, t, im = ax.specgram(self.data, Fs=self.samplerate,NFFT=1024, cmap=plt.get_cmap('autumn_r'))
+            cbar = fig.colorbar(im)
+            ax.xlabel('Time (s)')
+            ax.ylabel('Frequency (Hz)')
+            cbar.set_label('Intensity (dB)')
+            return fig
