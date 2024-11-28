@@ -89,7 +89,7 @@ class Model:
             _waveform.plot(_x, self.data)
         return _fig
 
-    #needs fixing
+
     def gen_intensity_figure(self):
         fig, ax = plt.subplots()
         _mono = Model.convert_mono(self.data)
