@@ -42,6 +42,8 @@ class View():
 
         self.waveform_canvas = None
 
+        self.intensity_canvas = None
+
     def set_controller(self, controller):
         self.controller = controller
 
@@ -56,6 +58,13 @@ class View():
         self.waveform_canvas = FigureCanvasTkAgg(self.controller.gen_waveform_figure(), master=self.waveform)
         self.waveform_canvas.draw()
         self.waveform_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
+    def update_intensity(self):
+        if self.intensity_canvas is not None:
+            self.intensity_canvas.get_tk_widget().pack_forget()
+        self.intensity_canvas = FigureCanvasTkAgg(self.controller.gen_intensity_figure(), master=self.intensity)
+        self.intensity_canvas.draw()
+        self.intensity_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
     def set_active_file(self, filename, duration):
         self.file_name.set("{} : {}s".format(filename, round(duration, 2)))

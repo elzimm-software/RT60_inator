@@ -89,12 +89,13 @@ class Model:
             _waveform.plot(_x, self.data)
         return _fig
 
+    #needs fixing
     def gen_intensity_figure(self):
         fig, ax = plt.subplots()
-        if len(self.data.shape) > 1:
-            spectrum, freqs, t, im = ax.specgram(self.data, Fs=self.samplerate,NFFT=1024, cmap=plt.get_cmap('autumn_r'))
-            cbar = fig.colorbar(im)
-            ax.xlabel('Time (s)')
-            ax.ylabel('Frequency (Hz)')
-            cbar.set_label('Intensity (dB)')
-            return fig
+
+        spectrum, freqs, t, im = ax.specgram(self.data, Fs=self.samplerate, NFFT=1024, cmap=plt.get_cmap('autumn_r'))
+        cbar = fig.colorbar(im, ax=ax)
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Frequency (Hz)')
+        cbar.set_label('Intensity (dB)')
+        return fig
