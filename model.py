@@ -92,8 +92,8 @@ class Model:
     #needs fixing
     def gen_intensity_figure(self):
         fig, ax = plt.subplots()
-
-        spectrum, freqs, t, im = ax.specgram(self.data, Fs=self.samplerate, NFFT=1024, cmap=plt.get_cmap('autumn_r'))
+        _mono = Model.convert_mono(self.data)
+        spectrum, freqs, t, im = ax.specgram(_mono, Fs=self.samplerate, NFFT=1024, cmap=plt.get_cmap('autumn_r'))
         cbar = fig.colorbar(im, ax=ax)
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Frequency (Hz)')
