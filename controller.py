@@ -20,3 +20,6 @@ class Controller:
             self.view.set_active_file(self.model.file, self.model.duration)
             self.view.update_waveform()
             self.view.update_intensity()
+
+    def get_resonant_frequency(self):
+        return self.model.get_resonant_frequency()
