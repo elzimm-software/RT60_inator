@@ -1,6 +1,7 @@
 import numpy as np
 import pathlib
 from scipy.io import wavfile
+from scipy.signal import welch
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from pydub import AudioSegment
@@ -20,6 +21,7 @@ class Model:
                 self.combined_rt60 = self.compute_rt60_time(self.data)
                 print(self.combined_rt60)
                 print(self.low_rt60, self.mid_rt60, self.high_rt60)
+                print(self.get_resonant_frequency())
             else:
                 display_error("Invalid file type.")
                 self.file = None
@@ -99,3 +101,9 @@ class Model:
         ax.set_ylabel('Frequency (Hz)')
         cbar.set_label('Intensity (dB)')
         return fig
+
+    def get_resonant_frequency(self):
+        _mono = Model.convert_mono(self.data)
+        frequencies, power = welch(_mono, self.samplerate, nperseg=4096)
+        dominant_frequency = frequencies[np.argmax(power)]
+        return dominant_frequency
