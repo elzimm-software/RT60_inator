@@ -68,4 +68,4 @@ class View():
 
     def set_active_file(self, filename, duration):
         self.file_name.set("{} : {}s".format(filename, round(duration, 2)))
-        self.file_disp.config(text=f"{self.file_name.get()}, resonant frequency: {self.controller.get_resonant_frequency()} Hz")
+        self.file_disp.config(text=f"{self.file_name.get()}, resonant frequency: {self.controller.get_resonant_frequency()} Hz, difference: {self.controller.get_difference()}s")

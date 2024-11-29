@@ -23,3 +23,6 @@ class Controller:
 
     def get_resonant_frequency(self):
         return self.model.get_resonant_frequency()
+
+    def get_difference(self):
+        return self.model.combined_rt60 - .5
