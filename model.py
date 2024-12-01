@@ -41,19 +41,6 @@ class Model:
             self.low_rt60, self.mid_rt60, self.high_rt60 = None, None, None
             self.combined_rt60 = None
 
-    def convert_mp3(self):
-        ext = pathlib.Path(self.file).suffix.lower()
-        if ext == '.mp3':
-            AudioSegment.from_mp3(self.file).export("converted.wav", format="wav")
-            self.samplerate, self.data = wavfile.read("converted.wav")
-            pathlib.Path("converted.wav").unlink()  # Delete the temp file
-            return True
-        elif ext == '.wav':
-            self.samplerate, self.data = wavfile.read(self.file)
-            return True
-        else:
-            return False
-
     def split_freq(self):
         _mono = Model.convert_mono(self.data)  # Convert stereo to mono if necessary
         _low = low_pass(high_pass(_mono, 1, self.samplerate), 1000,
@@ -81,6 +68,19 @@ class Model:
         else:
             return signal
 
+    def convert_mp3(self):
+        ext = pathlib.Path(self.file).suffix.lower()
+        if ext == '.mp3':
+            AudioSegment.from_mp3(self.file).export("converted.wav", format="wav")
+            self.samplerate, self.data = wavfile.read("converted.wav")
+            pathlib.Path("converted.wav").unlink()
+            return True
+        elif ext == '.wav':
+            self.samplerate, self.data = wavfile.read(self.file)
+            return True
+        else:
+            return False
+
     def gen_waveform_figure(self):
         _fig = Figure(figsize=(5, 4), dpi=100)
         _waveform = _fig.add_subplot(111)
@@ -105,49 +105,41 @@ class Model:
         cbar.set_label('Intensity (dB)')
         return fig
 
-    # New function for low frequency plot
     def gen_low_freq_figure(self):
-        _fig = Figure(figsize=(5, 4), dpi=100)
-        _low_freq = _fig.add_subplot(111)
+        fig, ax = plt.subplots()
         _x = np.linspace(0., self.duration, self.low_freq.shape[0])
-        _low_freq.plot(_x, self.low_freq)
-        _low_freq.set_xlabel("Time (s)")
-        _low_freq.set_ylabel("Amplitude")
-        _low_freq.set_title("Low Frequency")
-        return _fig
+        ax.plot(_x, self.low_freq)
+        ax.set_title("Low Frequency")
+        ax.set_xlabel("Time (s)")
+        ax.set_ylabel("Amplitude")
+        return fig
 
-    # New function for mid frequency plot
     def gen_mid_freq_figure(self):
-        _fig = Figure(figsize=(5, 4), dpi=100)
-        _mid_freq = _fig.add_subplot(111)
+        fig, ax = plt.subplots()
         _x = np.linspace(0., self.duration, self.mid_freq.shape[0])
-        _mid_freq.plot(_x, self.mid_freq)
-        _mid_freq.set_xlabel("Time (s)")
-        _mid_freq.set_ylabel("Amplitude")
-        _mid_freq.set_title("Mid Frequency")
-        return _fig
+        ax.plot(_x, self.mid_freq)
+        ax.set_title("Mid Frequency")
+        ax.set_xlabel("Time (s)")
+        ax.set_ylabel("Amplitude")
+        return fig
 
-    # New function for high frequency plot
     def gen_high_freq_figure(self):
-        _fig = Figure(figsize=(5, 4), dpi=100)
-        _high_freq = _fig.add_subplot(111)
+        fig, ax = plt.subplots()
         _x = np.linspace(0., self.duration, self.high_freq.shape[0])
-        _high_freq.plot(_x, self.high_freq)
-        _high_freq.set_xlabel("Time (s)")
-        _high_freq.set_ylabel("Amplitude")
-        _high_freq.set_title("High Frequency")
-        return _fig
+        ax.plot(_x, self.high_freq)
+        ax.set_title("High Frequency")
+        ax.set_xlabel("Time (s)")
+        ax.set_ylabel("Amplitude")
+        return fig
 
-    # New function for combined frequency plot
     def gen_combined_freq_figure(self):
-        _fig = Figure(figsize=(5, 4), dpi=100)
-        _combined_freq = _fig.add_subplot(111)
+        fig, ax = plt.subplots()
         _x = np.linspace(0., self.duration, self.data.shape[0])
-        _combined_freq.plot(_x, self.data)
-        _combined_freq.set_xlabel("Time (s)")
-        _combined_freq.set_ylabel("Amplitude")
-        _combined_freq.set_title("Combined Frequency")
-        return _fig
+        ax.plot(_x, self.data)
+        ax.set_title("Combined Frequency")
+        ax.set_xlabel("Time (s)")
+        ax.set_ylabel("Amplitude")
+        return fig
 
     def get_resonant_frequency(self):
         _mono = Model.convert_mono(self.data)
