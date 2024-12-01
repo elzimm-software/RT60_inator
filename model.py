@@ -10,28 +10,29 @@ from utils import digital_to_decibel, high_pass, low_pass, display_error
 
 class Model:
     def __init__(self, file=""):
-        if file != '':
+        if file != '':  # If a file is passed
             self.file = file
-            if self.convert_mp3():
-                self.duration = self.data.shape[0]/self.samplerate
-                self.low_freq, self.mid_freq, self.high_freq = self.split_freq()
-                self.low_rt60 = self.compute_rt60_time(self.low_freq)
-                self.mid_rt60 = self.compute_rt60_time(self.mid_freq)
-                self.high_rt60 = self.compute_rt60_time(self.high_freq)
-                self.combined_rt60 = self.compute_rt60_time(self.data)
-                print(self.combined_rt60)
-                print(self.low_rt60, self.mid_rt60, self.high_rt60)
-                print(self.get_resonant_frequency())
+            if self.convert_mp3():  # If the file is valid
+                self.duration = self.data.shape[0] / self.samplerate  # Calculate duration
+                self.low_freq, self.mid_freq, self.high_freq = self.split_freq()  # Split frequencies
+                self.low_rt60 = self.compute_rt60_time(self.low_freq)  # Low frequency RT60
+                self.mid_rt60 = self.compute_rt60_time(self.mid_freq)  # Mid frequency RT60
+                self.high_rt60 = self.compute_rt60_time(self.high_freq)  # High frequency RT60
+                self.combined_rt60 = self.compute_rt60_time(self.data)  # Combined RT60 for all frequencies
+                print(f"File loaded: {self.file}")
+                print(f"Low RT60: {self.low_rt60}, Mid RT60: {self.mid_rt60}, High RT60: {self.high_rt60}")
+                print(f"Combined RT60: {self.combined_rt60}")
             else:
-                display_error("Invalid file type.")
+                print("Invalid file type")
                 self.file = None
                 self.samplerate = None
                 self.data = None
                 self.duration = None
-                self.low_freq,self.mid_freq,self.high_freq = None, None, None
+                self.low_freq, self.mid_freq, self.high_freq = None, None, None
                 self.low_rt60, self.mid_rt60, self.high_rt60 = None, None, None
                 self.combined_rt60 = None
         else:
+            print("No file provided")
             self.file = None
             self.samplerate = None
             self.data = None
@@ -40,11 +41,27 @@ class Model:
             self.low_rt60, self.mid_rt60, self.high_rt60 = None, None, None
             self.combined_rt60 = None
 
+    def convert_mp3(self):
+        ext = pathlib.Path(self.file).suffix.lower()
+        if ext == '.mp3':
+            AudioSegment.from_mp3(self.file).export("converted.wav", format="wav")
+            self.samplerate, self.data = wavfile.read("converted.wav")
+            pathlib.Path("converted.wav").unlink()  # Delete the temp file
+            return True
+        elif ext == '.wav':
+            self.samplerate, self.data = wavfile.read(self.file)
+            return True
+        else:
+            return False
+
     def split_freq(self):
-        _mono = Model.convert_mono(self.data)
-        _low = low_pass(high_pass(_mono, 1, self.samplerate), 1000, self.samplerate)
-        _mid = low_pass(high_pass(_mono, 1001, self.samplerate), 3000, self.samplerate)
-        _high = low_pass(high_pass(_mono, 3001, self.samplerate), 20000, self.samplerate)
+        _mono = Model.convert_mono(self.data)  # Convert stereo to mono if necessary
+        _low = low_pass(high_pass(_mono, 1, self.samplerate), 1000,
+                        self.samplerate)  # Low-frequency band (1 Hz to 1000 Hz)
+        _mid = low_pass(high_pass(_mono, 1001, self.samplerate), 3000,
+                        self.samplerate)  # Mid-frequency band (1001 Hz to 3000 Hz)
+        _high = low_pass(high_pass(_mono, 3001, self.samplerate), 20000,
+                         self.samplerate)  # High-frequency band (3001 Hz to 20000 Hz)
         return _low, _mid, _high
 
     def compute_rt60_time(self, signal):
@@ -60,37 +77,23 @@ class Model:
     @staticmethod
     def convert_mono(signal):
         if len(signal.shape) > 1:
-            return np.array([( x[0] + x[1] )/2 for x in signal]).astype(np.int16)
+            return np.array([(x[0] + x[1]) / 2 for x in signal]).astype(np.int16)
         else:
             return signal
-
-    def convert_mp3(self):
-        ext = pathlib.Path(self.file).suffix.lower()
-        if ext == '.mp3':
-            AudioSegment.from_mp3(self.file).export("converted.wav", format="wav")
-            self.samplerate, self.data = wavfile.read("converted.wav")
-            pathlib.Path("converted.wav").unlink()
-            return True
-        elif ext == '.wav':
-            self.samplerate, self.data = wavfile.read(self.file)
-            return True
-        else:
-            return False
 
     def gen_waveform_figure(self):
         _fig = Figure(figsize=(5, 4), dpi=100)
         _waveform = _fig.add_subplot(111)
         _x = np.linspace(0., self.duration, self.data.shape[0])
         if len(self.data.shape) > 1:
-            _waveform.plot(_x, self.data[:,0], label="Left channel")
-            _waveform.plot(_x, self.data[:,1], label="Right channel")
+            _waveform.plot(_x, self.data[:, 0], label="Left channel")
+            _waveform.plot(_x, self.data[:, 1], label="Right channel")
             _waveform.legend()
             _waveform.set_xlabel("Time (s)")
             _waveform.set_ylabel("Amplitude")
         else:
             _waveform.plot(_x, self.data)
         return _fig
-
 
     def gen_intensity_figure(self):
         fig, ax = plt.subplots()
@@ -101,6 +104,50 @@ class Model:
         ax.set_ylabel('Frequency (Hz)')
         cbar.set_label('Intensity (dB)')
         return fig
+
+    # New function for low frequency plot
+    def gen_low_freq_figure(self):
+        _fig = Figure(figsize=(5, 4), dpi=100)
+        _low_freq = _fig.add_subplot(111)
+        _x = np.linspace(0., self.duration, self.low_freq.shape[0])
+        _low_freq.plot(_x, self.low_freq)
+        _low_freq.set_xlabel("Time (s)")
+        _low_freq.set_ylabel("Amplitude")
+        _low_freq.set_title("Low Frequency")
+        return _fig
+
+    # New function for mid frequency plot
+    def gen_mid_freq_figure(self):
+        _fig = Figure(figsize=(5, 4), dpi=100)
+        _mid_freq = _fig.add_subplot(111)
+        _x = np.linspace(0., self.duration, self.mid_freq.shape[0])
+        _mid_freq.plot(_x, self.mid_freq)
+        _mid_freq.set_xlabel("Time (s)")
+        _mid_freq.set_ylabel("Amplitude")
+        _mid_freq.set_title("Mid Frequency")
+        return _fig
+
+    # New function for high frequency plot
+    def gen_high_freq_figure(self):
+        _fig = Figure(figsize=(5, 4), dpi=100)
+        _high_freq = _fig.add_subplot(111)
+        _x = np.linspace(0., self.duration, self.high_freq.shape[0])
+        _high_freq.plot(_x, self.high_freq)
+        _high_freq.set_xlabel("Time (s)")
+        _high_freq.set_ylabel("Amplitude")
+        _high_freq.set_title("High Frequency")
+        return _fig
+
+    # New function for combined frequency plot
+    def gen_combined_freq_figure(self):
+        _fig = Figure(figsize=(5, 4), dpi=100)
+        _combined_freq = _fig.add_subplot(111)
+        _x = np.linspace(0., self.duration, self.data.shape[0])
+        _combined_freq.plot(_x, self.data)
+        _combined_freq.set_xlabel("Time (s)")
+        _combined_freq.set_ylabel("Amplitude")
+        _combined_freq.set_title("Combined Frequency")
+        return _fig
 
     def get_resonant_frequency(self):
         _mono = Model.convert_mono(self.data)
