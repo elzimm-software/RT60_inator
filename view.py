@@ -13,7 +13,6 @@ class View():
         self.tab_control = ttk.Notebook(self.root)
         self.waveform = ttk.Frame(self.tab_control)
         self.intensity = ttk.Frame(self.tab_control)
-        self.analysis = ttk.Frame(self.tab_control)
         self.low_freq = ttk.Frame(self.tab_control)
         self.mid_freq = ttk.Frame(self.tab_control)
         self.high_freq = ttk.Frame(self.tab_control)
@@ -27,7 +26,6 @@ class View():
         self.tab_control.add(self.mid_freq, text="Mid Frequency")
         self.tab_control.add(self.high_freq, text="High Frequency")
         self.tab_control.add(self.combined_freq, text="Combined Frequency")
-        self.tab_control.add(self.analysis, text="Analysis")
         self.tab_control.pack(expand=1, fill="both")
 
         self.import_button = ttk.Button(self.active_file, text="Import", command=self.import_clicked)
